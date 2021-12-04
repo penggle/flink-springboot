@@ -1,6 +1,5 @@
 package com.penglecode.flink.examples.wordcount;
 
-import com.penglecode.flink.common.util.SpringUtils;
 import com.penglecode.flink.examples.FlinkExample;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Component;
  * @since 2021/11/14 12:53
  */
 @Component
-public class WordCountExample implements FlinkExample {
+public class WordCountExample extends FlinkExample {
 
     /**
      * parallelism(并行度)的优先级：代码中指定的 > Submit-Job时指定的 > flink全局配置(parallelism.default)
@@ -33,11 +32,8 @@ public class WordCountExample implements FlinkExample {
          * 其中-l：listen监听的意思，-k：keep保持着不断开
          * (注意得先启动文本socket服务端！！！否则此运行程序会报错)
          */
-        /*ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        String ncHost = parameterTool.get("nc.host", "localhost");
-        int ncPort = parameterTool.getInt("nc.port", 7777);*/
-        String ncHost = SpringUtils.getEnvironment().getProperty("spring.flink.examples.wordcount.nc-host", "localhost");
-        int ncPort = SpringUtils.getEnvironment().getProperty("spring.flink.examples.wordcount.nc-port", Integer.class, 7777);
+        String ncHost = getEnvironment().getProperty("spring.flink.examples.wordcount.nc-host", "localhost");
+        int ncPort = getEnvironment().getProperty("spring.flink.examples.wordcount.nc-port", Integer.class, 7777);
         DataStream<String> inputDataStream = env.socketTextStream(ncHost, ncPort);
         //3、对数据流进行处理，具体来说就是将每行数据进行分词，收集<word,1>这样的二元组(最小粒度的二元组)
         DataStream<Tuple2<String,Integer>> resultStream = inputDataStream.flatMap(new WordTokenizer()).setParallelism(2)

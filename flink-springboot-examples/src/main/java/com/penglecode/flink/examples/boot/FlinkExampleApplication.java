@@ -1,11 +1,8 @@
 package com.penglecode.flink.examples.boot;
 
 import com.penglecode.flink.BasePackage;
-import com.penglecode.flink.common.util.JsonUtils;
-import com.penglecode.flink.common.util.SpringUtils;
 import com.penglecode.flink.examples.FlinkExample;
-import com.penglecode.flink.examples.wordcount.WordCountExample;
-import org.apache.flink.api.java.utils.ParameterTool;
+import com.penglecode.flink.examples.FlinkExampleFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -13,7 +10,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.util.ClassUtils;
 
 /**
  * Flink示例启动入口
@@ -35,13 +31,12 @@ public class FlinkExampleApplication implements ApplicationRunner {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void run(ApplicationArguments args) throws Exception {
-        LOGGER.info("【ApplicationRunner】==> args = {}", JsonUtils.object2Json(args));
-        ParameterTool parameterTool = ParameterTool.fromArgs(args.getSourceArgs());
-        String flinkExampleClassName = parameterTool.get("flink.example.class", WordCountExample.class.getName());
-        Class<? extends FlinkExample> flinkExampleClass = (Class<? extends FlinkExample>) ClassUtils.forName(flinkExampleClassName, ClassUtils.getDefaultClassLoader());
-        SpringUtils.getBean(flinkExampleClass).run(args);
+        LOGGER.info("【ApplicationRunner】==> args = {}", (Object) args.getSourceArgs());
+        FlinkExample flinkExample = FlinkExampleFactory.getFlinkExample(args);
+        if(flinkExample != null) {
+            flinkExample.run(args);
+        }
     }
 
 }
